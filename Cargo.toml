@@ -8,3 +8,4 @@ rand = "*"
 
 [dependencies.sdl2]
 version = "0.34.3"
+features = ["unsafe_textures"]
