@@ -23,27 +23,21 @@ impl Cpu {
             v: [0; 16],
             i: 0,
             pc: 0x200,
-            sound_timer: 0, delay_timer: 0,
+            sound_timer: 0,
+            delay_timer: 0,
             stack: Vec::with_capacity(12),
             is_key_pressed: [false; 16],
         }
-    }
-
-    pub fn fetch_execute(&mut self, bus: &mut Bus) {
-        let instruction = self.fetch_instruction(bus);
-        self.execute_instruction(instruction, bus);
     }
 
     fn fetch_instruction(&mut self, bus: &mut Bus) -> u16 {
         let hi = bus.ram_read_byte(self.pc as u16);
         let lo = bus.ram_read_byte((self.pc + 1) as u16);
 
-        let instruction = u16::from_be_bytes([hi, lo]);
         self.pc += 2;
-
         self.update_timers();
 
-        instruction
+        u16::from_be_bytes([hi, lo])
     }
 
     fn update_timers(&mut self) {

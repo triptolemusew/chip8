@@ -1,5 +1,3 @@
-use crate::constants::{FONTSET, MEMORY_SIZE};
-
 #[derive(Debug, Clone)]
 pub struct Memory {
     pub contents: Vec<u8>,
@@ -8,7 +6,7 @@ pub struct Memory {
 impl Memory {
     pub fn new() -> Self {
         Memory {
-            contents: vec![0; MEMORY_SIZE],
+            contents: vec![0; 4096],
         }
     }
 

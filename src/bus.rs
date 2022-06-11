@@ -1,5 +1,5 @@
-use crate::memory::Memory;
 use crate::display::Display;
+use crate::memory::Memory;
 
 pub struct Bus {
     memory: Memory,
@@ -10,7 +10,7 @@ impl Bus {
     pub fn new() -> Self {
         Bus {
             memory: Memory::new(),
-            display: Display::new(),
+            display: Display::default(),
         }
     }
 
