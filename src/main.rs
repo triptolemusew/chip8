@@ -6,6 +6,7 @@ mod constants;
 mod graphics;
 mod display;
 mod memory;
+mod cpu;
 
 use rom::Rom;
 
