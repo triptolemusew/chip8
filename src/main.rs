@@ -22,7 +22,6 @@ fn main() {
     };
 
     let rom = Rom::new(&String::from(file_name));
-    println!("rom contents: {:?}", rom.contents);
 
     let mut emulator = Emulator::new();
 
