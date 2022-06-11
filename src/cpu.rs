@@ -189,7 +189,14 @@ impl Cpu {
                             break;
                         }
                         if bus.ram_read_byte(self.i + row) & (1 << (7 - col)) != 0 {
-                            // TODO: Manipulate pixel here
+                            let pixel = &mut bus.get_display_buffer()[pixel_y][pixel_x];
+                            if let Color::White = *pixel {
+                                self.v[F] = 1;
+                            }
+                            *pixel = match *pixel {
+                                Color::Black => Color::White,
+                                Color::White => Color::Black,
+                            };
                         }
                     }
                 }
@@ -198,7 +205,7 @@ impl Cpu {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 match instruction & 0x00FF {
                     0x009E => {
-                        // TODO
+                        // TODO: Proper logic for keyboard
                         if self.is_key_pressed[usize::from(self.v[x])] {
                             self.pc += 2;
                         }

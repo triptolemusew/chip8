@@ -1,5 +1,5 @@
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use std::fmt::Debug;
+use std::ops::{Index, IndexMut};
 
 #[derive(Clone, Copy)]
 #[repr(u8)]
@@ -14,6 +14,7 @@ pub struct Display {
 }
 
 impl Display {
+    #[allow(unused)]
     pub fn get_index_from_coords(x: usize, y: usize) -> usize {
         y * SCREEN_WIDTH + x
     }
@@ -27,7 +28,29 @@ impl Display {
 
 impl Default for Display {
     fn default() -> Self {
-        Self { pixels: [Color::Black; SCREEN_WIDTH * SCREEN_HEIGHT] }
+        Self {
+            pixels: [Color::Black; SCREEN_WIDTH * SCREEN_HEIGHT],
+        }
     }
 }
 
+impl AsRef<[u8]> for Display {
+    fn as_ref(&self) -> &[u8] {
+        unsafe { &*(&self.pixels as *const [Color] as *const [u8]) }
+    }
+}
+
+impl Index<usize> for Display {
+    type Output = [Color];
+    fn index(&self, index: usize) -> &Self::Output {
+        let start = index * SCREEN_WIDTH;
+        &self.pixels[start..(start + SCREEN_WIDTH)]
+    }
+}
+
+impl IndexMut<usize> for Display {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        let start = index * SCREEN_WIDTH;
+        &mut self.pixels[start..(start + SCREEN_WIDTH)]
+    }
+}
