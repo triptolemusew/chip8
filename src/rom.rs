@@ -1,7 +1,6 @@
 use std::{fs::*, io::Read};
 
 #[derive(Debug)]
-
 pub struct Rom {
     pub contents: Vec<u8>,
 }
@@ -20,5 +19,9 @@ impl Rom {
 
     pub fn get_rom_size(&self) -> usize {
         self.contents.len()
+    }
+
+    pub fn get_contents(&self) -> &Vec<u8> {
+        &self.contents
     }
 }

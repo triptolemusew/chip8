@@ -1,9 +1,11 @@
 extern crate sdl2;
 
-mod memory;
 mod rom;
+mod bus;
 mod constants;
 mod graphics;
+mod display;
+mod memory;
 
 use rom::Rom;
 
