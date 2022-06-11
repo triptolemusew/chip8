@@ -30,6 +30,11 @@ impl Cpu {
         }
     }
 
+    pub fn fetch_execute(&mut self, bus: &mut Bus) {
+        let instruction = self.fetch_instruction(bus);
+        self.execute_instruction(instruction, bus);
+    }
+
     fn fetch_instruction(&mut self, bus: &mut Bus) -> u16 {
         let hi = bus.ram_read_byte(self.pc as u16);
         let lo = bus.ram_read_byte((self.pc + 1) as u16);

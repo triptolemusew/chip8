@@ -7,7 +7,9 @@ mod graphics;
 mod display;
 mod memory;
 mod cpu;
+mod emulator;
 
+use emulator::Emulator;
 use rom::Rom;
 
 use std::env;
@@ -21,4 +23,9 @@ fn main() {
 
     let rom = Rom::new(&String::from(file_name));
     println!("rom contents: {:?}", rom.contents);
+
+    let mut emulator = Emulator::new();
+
+    emulator.load_rom(&rom);
+    emulator.run();
 }
