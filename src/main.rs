@@ -9,6 +9,8 @@ mod memory;
 mod cpu;
 mod emulator;
 
+mod lib;
+
 use emulator::Emulator;
 use rom::Rom;
 
