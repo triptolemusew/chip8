@@ -1,3 +1,3 @@
 import * as wasm from '../pkg';
 
-wasm.greet("chip8");
+wasm.run();

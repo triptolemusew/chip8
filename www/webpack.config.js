@@ -13,13 +13,17 @@ module.exports = {
   resolve: {
     extensions: [".js", ".wasm"]
   },
+  watchOptions: {
+    aggregateTimeout: 200,
+    poll: 1000,
+  },
   plugins: [
-    // new CopyWebpackPlugin(['index.html']),
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({template: "index.html"}),
     new WasmPackPlugin({
-      crateDirectory: path.join(__dirname, '../.'),
+      crateDirectory: path.join(__dirname, '../'),
+      outDir: path.join(__dirname, '../pkg'),
+      args: "--log-level warn",
       extraArgs: '--features=wasm',
-      outDir: "pkg"
     })
   ],
   experiments: {
