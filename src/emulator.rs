@@ -38,7 +38,7 @@ impl Emulator {
             self.run_instruction();
 
             let buffer = self.bus.get_display_buffer();
-            graphics.draw(&buffer.as_ref());
+            graphics.draw(buffer.as_ref());
 
             for event in event.poll_iter() {
                 match event {
