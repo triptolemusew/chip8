@@ -49,10 +49,9 @@ impl Cpu {
         if self.delay_timer > 0 {
             self.delay_timer -= 1;
         }
-        if self.sound_timer > 0 {
-            if self.sound_timer == 1 {
-                self.sound_timer -= 1;
-            }
+
+        if self.sound_timer > 0 && self.sound_timer == 1 {
+            self.sound_timer -= 1;
         }
     }
 
@@ -67,10 +66,10 @@ impl Cpu {
                     if let Some(return_address) = self.stack.pop() {
                         self.pc = return_address;
                     } else {
-                        panic!("Smth went wrong!")
+                        unimplemented!()
                     }
                 }
-                _ => panic!("Smth went wrong!"),
+                _ => unreachable!(),
             },
             0x1000 => {
                 self.pc = usize::from(instruction & 0x0FFF);
@@ -94,6 +93,7 @@ impl Cpu {
             0x5000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let y = usize::from((instruction & 0x00F0) >> 4);
+
                 if self.v[x] == self.v[y] {
                     self.pc += 2;
                 }
@@ -109,6 +109,7 @@ impl Cpu {
             0x8000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let y = usize::from((instruction & 0x00F0) >> 4);
+
                 match instruction & 0x000F {
                     0x0000 => {
                         self.v[x] = self.v[y];
@@ -145,19 +146,20 @@ impl Cpu {
                         self.v[F] = (self.v[y] & 0x80 != 0) as u8;
                         self.v[x] = self.v[y] << 1;
                     }
-                    _ => panic!("Smth went wrong!"),
+                    _ => unreachable!(),
                 }
             }
             0x9000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let y = usize::from((instruction & 0x00F0) >> 4);
+
                 match instruction & 0x000F {
                     0x0000 => {
                         if self.v[x] != self.v[y] {
                             self.pc += 2;
                         }
                     }
-                    _ => panic!("Smth went wrong!"),
+                    _ => unreachable!(),
                 }
             }
             0xA000 => {
@@ -173,6 +175,7 @@ impl Cpu {
             0xD000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let vx = usize::from(self.v[x]) % SCREEN_WIDTH;
+
                 let y = usize::from((instruction & 0x00F0) >> 4);
                 let vy = usize::from(self.v[y]) % SCREEN_HEIGHT;
 
@@ -203,6 +206,7 @@ impl Cpu {
             }
             0xE000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
+
                 match instruction & 0x00FF {
                     0x009E => {
                         // TODO: Proper logic for keyboard
@@ -215,11 +219,12 @@ impl Cpu {
                             self.pc += 2;
                         }
                     }
-                    _ => panic!("Smth went wrong!"),
+                    _ => unreachable!(),
                 }
             }
             0xF000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
+
                 match instruction & 0x00FF {
                     0x0007 => {
                         self.v[x] = self.delay_timer;
@@ -260,10 +265,10 @@ impl Cpu {
                         }
                         self.i += x as u16 + 1;
                     }
-                    _ => panic!("Smth went wrong!"),
+                    _ => unreachable!(),
                 }
             }
-            _ => panic!("Smth went wrong!"),
+            _ => unreachable!(),
         }
     }
 }
