@@ -10,21 +10,38 @@ crate-type = ["cdylib", "rlib"]
 name = "sdl"
 path = "src/main.rs"
 
-[dependencies]
-rand = "*"
+[features]
+sdl = [
+  "rand",
+  "sdl2"
+]
+
+wasm = [
+  "js-sys",
+  "wasm-bindgen",
+  "web-sys"
+]
+
+[dependencies.rand]
+version = "*"
+optional = true
 
 [dependencies.sdl2]
 version = "0.34.3"
+optional = true
 features = ["unsafe_textures"]
 
 [dependencies.js-sys]
 version = "0.3.57"
+optional = true
 
 [dependencies.wasm-bindgen]
 version = "0.2.80"
+optional = true
 
 [dependencies.web-sys]
 version = "0.3.55"
+optional = true
 features = [
   'CssStyleDeclaration',
   'CanvasRenderingContext2d',
