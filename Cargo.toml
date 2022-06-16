@@ -12,19 +12,12 @@ name = "sdl"
 path = "src/main.rs"
 
 [features]
-sdl = [
-  "rand",
-  "sdl2"
-]
-
-wasm = [
-  "js-sys",
-  "wasm-bindgen",
-  "web-sys"
-]
+sdl = ["sdl2"]
+wasm = ["js-sys", "wasm-bindgen", "web-sys"]
 
 [dependencies]
-rand = {version = "*", optional = true}
+getrandom = {version = "0.2.2", features = ["js"]}
+rand = {version = "*", features = ["getrandom"]}
 sdl2 = {version = "0.34.3", optional = true, features = ["unsafe_textures"]}
 js-sys = {version = "0.3.57", optional = true}
 wasm-bindgen = {version = "0.2.80", optional = true}
