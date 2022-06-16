@@ -22,27 +22,12 @@ wasm = [
   "web-sys"
 ]
 
-[dependencies.rand]
-version = "*"
-optional = true
-
-[dependencies.sdl2]
-version = "0.34.3"
-optional = true
-features = ["unsafe_textures"]
-
-[dependencies.js-sys]
-version = "0.3.57"
-optional = true
-
-[dependencies.wasm-bindgen]
-version = "0.2.80"
-optional = true
-
-[dependencies.web-sys]
-version = "0.3.55"
-optional = true
-features = [
+[dependencies]
+rand = {version = "*", optional = true}
+sdl2 = {version = "0.34.3", optional = true}
+js-sys = {version = "0.3.57", optional = true}
+wasm-bindgen = {version = "0.2.80", optional = true}
+web-sys = {version = "0.3.55", optional = true, features = [
   'CssStyleDeclaration',
   'CanvasRenderingContext2d',
   'HtmlElement',
@@ -51,4 +36,4 @@ features = [
   'Node',
   'Document',
   'console',
-]
+]}
