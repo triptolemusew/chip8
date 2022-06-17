@@ -30,12 +30,16 @@ impl Emulator {
         }
     }
 
+    pub fn step(&mut self) {
+        self.cpu.fetch_execute(&mut self.bus);
+    }
+
     pub fn run(&mut self) {
         let mut graphics = Graphics::new(&self.sdl, 800, 600);
         let mut event = self.sdl.event_pump().unwrap();
 
         'running: loop {
-            self.run_instruction();
+            self.cpu.fetch_execute(&mut self.bus);
 
             let buffer = self.bus.get_display_buffer();
             graphics.draw(buffer.as_ref());
@@ -51,9 +55,5 @@ impl Emulator {
                 }
             }
         }
-    }
-
-    fn run_instruction(&mut self) {
-        self.cpu.fetch_execute(&mut self.bus);
     }
 }
