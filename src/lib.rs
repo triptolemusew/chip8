@@ -14,6 +14,7 @@ use wasm_bindgen::JsCast;
 #[cfg(feature = "wasm")]
 use web_sys::CanvasRenderingContext2d;
 
+use core::f64;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -27,7 +28,9 @@ mod rom;
 use bus::Bus;
 use constants::*;
 use cpu::Cpu;
-use rom::Rom;
+
+pub const HARD_WIDTH: usize = 800;
+pub const HARD_HEIGHT: usize = 600;
 
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
@@ -87,9 +90,10 @@ pub fn run() -> Result<(), JsValue> {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
-    // context.scale(1.5, 1.5).unwrap();
-    canvas.set_width(1080);
-    canvas.set_height(1080);
+    canvas.set_width(HARD_WIDTH as u32);
+    canvas.set_height(HARD_HEIGHT as u32);
+
+    context.scale(10.0, 10.0);
 
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         wasm_emulator.step();
@@ -134,31 +138,28 @@ impl WasmEmulator {
 
     pub fn draw_graphics(&mut self, context: &CanvasRenderingContext2d) {
         let buffer = self.bus.get_display_buffer();
-        update_canvas(
-            context,
-            (64 as f64) * 2.0,
-            (32 as f64) * 2.0,
-            &buffer,
-        );
-    }
-}
 
-pub fn update_canvas(
-    context: &CanvasRenderingContext2d,
-    width: f64,
-    height: f64,
-    buffer: &display::Display,
-) {
-    context.set_fill_style(&JsValue::from_str("black"));
-    context.fill_rect(0.0, 0.0, 1920 as f64, 1080 as f64);
+        context.set_fill_style(&JsValue::from_str("black"));
+        context.fill_rect(
+            0.0,
+            0.0,
+            (HARD_WIDTH as f64) * 2.0,
+            (HARD_HEIGHT as f64) * 2.0,
+            );
 
-    // For pixel in screen
-    context.set_fill_style(&JsValue::from_str("white"));
+        // For pixel in screen
+        context.set_fill_style(&JsValue::from_str("white"));
 
-    for y in 0..1920 {
-        for x in 0..1080 {
-            if y % 2 == 0 {
-                context.fill_rect(x as f64, y as f64, 1.0, 1.0);
+        // log(format!("{:?}", buffer.as_ref()).as_str());
+
+        for y in 0..32 {
+            for x in 0..64 {
+                let pixel = buffer[y][x];
+
+                match pixel {
+                    display::Color::Black => context.fill_rect(x as f64, y as f64, 1.0, 1.0),
+                    _ => {}
+                };
             }
         }
     }
