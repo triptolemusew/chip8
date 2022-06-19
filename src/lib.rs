@@ -70,7 +70,7 @@ pub fn run() -> Result<(), JsValue> {
     let f = Rc::new(RefCell::new(None));
     let g = f.clone();
 
-    let rom = include_bytes!("../roms/TANK").to_vec();
+    let rom = include_bytes!("../roms/SPACE_INVADERS").to_vec();
     let mut wasm_emulator = WasmEmulator::new();
 
     // Load the rom
@@ -95,14 +95,35 @@ pub fn run() -> Result<(), JsValue> {
 
     context.scale(10.0, 10.0);
 
+    let max_timeout = 20;
+    let mut cycle_counter = 0;
+    let mut current_timeout = 0;
+
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        wasm_emulator.step();
-        wasm_emulator.draw_graphics(&context);
+        loop {
+            wasm_emulator.step();
 
-        request_animation_frame(f.borrow().as_ref().unwrap());
+            if wasm_emulator.cpu.draw_enable {
+                wasm_emulator.draw_graphics(&context);
+                request_animation_frame(f.borrow().as_ref().unwrap());
+                current_timeout = 0;
+                wasm_emulator.cpu.draw_enable = false;
+                break;
+            }
 
-        // let _ = f.borrow_mut().take();
-        // return;
+            if current_timeout >= max_timeout {
+                current_timeout = 0;
+                break;
+            }
+
+            // cycle_counter += 1;
+            // if cycle_counter >= CYCLES_PER_SLEEP {
+            //     cycle_counter = 0;
+            //     sleep(MILLIS_PER_SLEEP.floor() as u64);
+            // }
+            // wasm_emulator.step();
+            // wasm_emulator.draw_graphics(&context);
+        }
     }) as Box<dyn FnMut()>));
 
     #[cfg(feature = "wasm")]
@@ -113,8 +134,8 @@ pub fn run() -> Result<(), JsValue> {
 
 #[cfg(feature = "wasm")]
 pub struct WasmEmulator {
-    bus: Bus,
-    cpu: Cpu,
+    pub bus: Bus,
+    pub cpu: Cpu,
 }
 
 #[cfg(feature = "wasm")]
@@ -145,13 +166,12 @@ impl WasmEmulator {
             0.0,
             (HARD_WIDTH as f64) * 2.0,
             (HARD_HEIGHT as f64) * 2.0,
-            );
+        );
 
         // For pixel in screen
         context.set_fill_style(&JsValue::from_str("white"));
 
         // log(format!("{:?}", buffer.as_ref()).as_str());
-
         for y in 0..32 {
             for x in 0..64 {
                 let pixel = buffer[y][x];
@@ -162,5 +182,14 @@ impl WasmEmulator {
                 };
             }
         }
+    }
+}
+
+#[cfg(feature = "wasm")]
+pub fn sleep(millis: u64) {
+    let start = js_sys::Date::now();
+    let mut current = start;
+    while current - start < millis as f64 {
+        current = js_sys::Date::now();
     }
 }

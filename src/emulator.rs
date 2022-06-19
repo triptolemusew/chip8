@@ -42,7 +42,11 @@ impl Emulator {
             self.cpu.fetch_execute(&mut self.bus);
 
             let buffer = self.bus.get_display_buffer();
-            graphics.draw(buffer.as_ref());
+            // TODO: Step it up.
+            if self.cpu.draw_enable {
+                graphics.draw(buffer.as_ref());
+                self.cpu.draw_enable = false;
+            }
 
             for event in event.poll_iter() {
                 match event {
