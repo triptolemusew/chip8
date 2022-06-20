@@ -54,3 +54,21 @@ impl IndexMut<usize> for Display {
         &mut self.pixels[start..(start + SCREEN_WIDTH)]
     }
 }
+
+pub struct DisplaySink {
+    inner: Option<Display>,
+}
+
+impl DisplaySink {
+    pub fn new() -> Self {
+        DisplaySink { inner: None }
+    }
+
+    pub fn consume(self) -> Option<Display> {
+        self.inner
+    }
+
+    pub fn append(&mut self, value: Display) {
+        self.inner = Some(value);
+    }
+}

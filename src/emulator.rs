@@ -7,6 +7,7 @@ use crate::constants::*;
 use crate::cpu::Cpu;
 use crate::graphics::Graphics;
 use crate::rom::Rom;
+use crate::display::DisplaySink;
 
 pub struct Emulator {
     bus: Bus,
@@ -30,24 +31,24 @@ impl Emulator {
         }
     }
 
-    pub fn step(&mut self) {
-        self.cpu.fetch_execute(&mut self.bus);
-    }
+    // pub fn step(&mut self) {
+    //     self.cpu.fetch_execute(&mut self.bus);
+    // }
 
     pub fn run(&mut self) {
         let mut graphics = Graphics::new(&self.sdl, 800, 600);
         let mut event = self.sdl.event_pump().unwrap();
 
         'running: loop {
-            self.cpu.fetch_execute(&mut self.bus);
+            let mut display_sink = DisplaySink::new();
+            self.cpu.fetch_execute(&mut self.bus, &mut display_sink);
 
-            let buffer = self.bus.get_display_buffer();
-            // TODO: Step it up.
-            if self.cpu.draw_enable {
+            // Only render the frame when it's available as a full buffer
+            if let Some(buffer) = display_sink.consume() {
                 graphics.draw(buffer.as_ref());
-                self.cpu.draw_enable = false;
             }
 
+            // TODO: Refactor this out to a gamepad to read keypresses
             for event in event.poll_iter() {
                 match event {
                     Event::Quit { .. }

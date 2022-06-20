@@ -1,8 +1,6 @@
 use crate::bus::Bus;
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::display::Color;
-
-use rand;
+use crate::display::{Color, DisplaySink};
 
 const SIZE_OF_SPRITE_FOR_DIGIT: u16 = 5;
 
@@ -32,9 +30,9 @@ impl Cpu {
         }
     }
 
-    pub fn fetch_execute(&mut self, bus: &mut Bus) {
+    pub fn fetch_execute(&mut self, bus: &mut Bus, display_sink: &mut DisplaySink) {
         let instruction = self.fetch_instruction(bus);
-        self.execute_instruction(instruction, bus);
+        self.execute_instruction(instruction, bus, display_sink);
     }
 
     fn fetch_instruction(&mut self, bus: &mut Bus) -> u16 {
@@ -56,7 +54,12 @@ impl Cpu {
         }
     }
 
-    fn execute_instruction(&mut self, instruction: u16, bus: &mut Bus) {
+    fn execute_instruction(
+        &mut self,
+        instruction: u16,
+        bus: &mut Bus,
+        display_sink: &mut DisplaySink,
+    ) {
         const F: usize = 0xF;
         match instruction & 0xF000 {
             0x0000 => match instruction & 0x0FFF {
@@ -204,7 +207,7 @@ impl Cpu {
                         }
                     }
                 }
-                self.draw_enable = true;
+                display_sink.append(bus.get_display_buffer().clone());
             }
             0xE000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
