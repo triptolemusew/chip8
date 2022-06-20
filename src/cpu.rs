@@ -12,7 +12,7 @@ pub struct Cpu {
     sound_timer: u8,
     delay_timer: u8,
     stack: Vec<usize>,
-    is_key_pressed: [bool; 16],
+    pub keypad: [bool; 16],
 }
 
 impl Cpu {
@@ -24,7 +24,7 @@ impl Cpu {
             sound_timer: 0,
             delay_timer: 0,
             stack: Vec::with_capacity(12),
-            is_key_pressed: [false; 16],
+            keypad: [false; 16],
         }
     }
 
@@ -212,14 +212,15 @@ impl Cpu {
 
                 match instruction & 0x00FF {
                     0x009E => {
-                        // TODO: Proper logic for keyboard
-                        if self.is_key_pressed[usize::from(self.v[x])] {
-                            self.pc += 2;
+                        match self.keypad[usize::from(self.v[x])] {
+                            true => self.pc += 2,
+                            false => {},
                         }
                     }
                     0x00A1 => {
-                        if !self.is_key_pressed[usize::from(self.v[x])] {
-                            self.pc += 2;
+                        match !self.keypad[usize::from(self.v[x])] {
+                            true => self.pc += 2,
+                            false => {},
                         }
                     }
                     _ => unreachable!(),
@@ -233,7 +234,7 @@ impl Cpu {
                         self.v[x] = self.delay_timer;
                     }
                     0x000A => {
-                        if let Some(key) = self.is_key_pressed.iter().position(|&pressed| pressed) {
+                        if let Some(key) = self.keypad.iter().position(|&pressed| pressed) {
                             self.v[x] = key as u8;
                         } else {
                             self.pc -= 2;
