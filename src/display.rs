@@ -1,5 +1,8 @@
-use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use std::ops::{Index, IndexMut};
+
+// Constants
+pub const SCREEN_HEIGHT: usize = 32;
+pub const SCREEN_WIDTH: usize = 64;
 
 #[derive(Clone, Copy)]
 #[repr(u8)]

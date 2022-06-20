@@ -1,13 +1,22 @@
-use sdl2;
+use std::time::{Duration, Instant};
+
 use sdl2::event::Event;
 use sdl2::keyboard::{KeyboardState, Keycode, PressedScancodeIterator, Scancode};
 
 use crate::bus::Bus;
-use crate::constants::*;
 use crate::cpu::Cpu;
 use crate::display::DisplaySink;
 use crate::graphics::Graphics;
 use crate::rom::Rom;
+
+// Constants
+pub const PROGRAM_START: u16 = 0x200;
+pub const CLOCK_SPEED: u64 = 500;
+pub const REFRESH_RATE: u64 = 60;
+
+// pub const CYCLES_PER_SECOND: u64 = 500;
+// pub const CYCLES_PER_SLEEP: u64 = 10;
+// pub const MILLIS_PER_SLEEP: f64 = (CYCLES_PER_SLEEP as f64 / CYCLES_PER_SECOND as f64) * 1000.0;
 
 pub struct Emulator {
     bus: Bus,
@@ -31,15 +40,15 @@ impl Emulator {
         }
     }
 
-    // pub fn step(&mut self) {
-    //     self.cpu.fetch_execute(&mut self.bus);
-    // }
-
     pub fn run(&mut self) {
         let mut graphics = Graphics::new(&self.sdl, 800, 600);
+        let mut timer = self.sdl.timer().unwrap();
         let mut events = self.sdl.event_pump().unwrap();
 
-        'running: loop {
+        'main: loop {
+            let start_time = Instant::now();
+            let frame_time = Duration::from_millis(500 / 60);
+
             let mut display_sink = DisplaySink::new();
             self.cpu.fetch_execute(&mut self.bus, &mut display_sink);
 
@@ -55,7 +64,7 @@ impl Emulator {
                     | Event::KeyDown {
                         keycode: Some(Keycode::Escape),
                         ..
-                    } => break 'running,
+                    } => break 'main,
                     _ => {}
                 }
             }
@@ -84,6 +93,12 @@ impl Emulator {
                 if pressed >= 0 {
                     self.cpu.keypad[pressed as usize] = true;
                 }
+            }
+
+            let elapsed_time = start_time.elapsed();
+            if elapsed_time < frame_time {
+                let remaining_time = frame_time - elapsed_time;
+                std::thread::sleep(remaining_time);
             }
         }
     }

@@ -1,8 +1,7 @@
 use crate::bus::Bus;
-use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::display::{Color, DisplaySink};
+use crate::display::{Color, DisplaySink, SCREEN_HEIGHT, SCREEN_WIDTH};
 
-const SIZE_OF_SPRITE_FOR_DIGIT: u16 = 5;
+const SPRITE_SIZE: u16 = 5;
 
 #[derive(Default)]
 pub struct Cpu {
@@ -37,10 +36,12 @@ impl Cpu {
         let hi = bus.ram_read_byte(self.pc as u16);
         let lo = bus.ram_read_byte((self.pc + 1) as u16);
 
+        let instruction = u16::from_be_bytes([hi, lo]);
         self.pc += 2;
+
         self.update_timers();
 
-        u16::from_be_bytes([hi, lo])
+        instruction
     }
 
     fn update_timers(&mut self) {
@@ -211,18 +212,14 @@ impl Cpu {
                 let x = usize::from((instruction & 0x0F00) >> 8);
 
                 match instruction & 0x00FF {
-                    0x009E => {
-                        match self.keypad[usize::from(self.v[x])] {
-                            true => self.pc += 2,
-                            false => {},
-                        }
-                    }
-                    0x00A1 => {
-                        match !self.keypad[usize::from(self.v[x])] {
-                            true => self.pc += 2,
-                            false => {},
-                        }
-                    }
+                    0x009E => match self.keypad[usize::from(self.v[x])] {
+                        true => self.pc += 2,
+                        false => {}
+                    },
+                    0x00A1 => match !self.keypad[usize::from(self.v[x])] {
+                        true => self.pc += 2,
+                        false => {}
+                    },
                     _ => unreachable!(),
                 }
             }
@@ -250,7 +247,7 @@ impl Cpu {
                         self.i += u16::from(self.v[x]);
                     }
                     0x0029 => {
-                        self.i = u16::from(self.v[x] & 0x0F) * SIZE_OF_SPRITE_FOR_DIGIT;
+                        self.i = u16::from(self.v[x] & 0x0F) * SPRITE_SIZE;
                     }
                     0x0033 => {
                         bus.ram_write_byte(self.i, self.v[x] / 100);

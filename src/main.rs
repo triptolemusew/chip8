@@ -2,7 +2,6 @@ extern crate sdl2;
 
 mod rom;
 mod bus;
-mod constants;
 mod graphics;
 mod display;
 mod memory;
