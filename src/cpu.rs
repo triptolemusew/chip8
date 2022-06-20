@@ -11,7 +11,7 @@ pub struct Cpu {
     sound_timer: u8,
     delay_timer: u8,
     stack: Vec<usize>,
-    pub keypad: [bool; 16]
+    pub keypad: [bool; 16],
 }
 
 impl Cpu {
