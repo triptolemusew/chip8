@@ -24,7 +24,7 @@ impl Display {
 
     pub fn clear(&mut self) {
         for pixel in self.pixels.iter_mut() {
-            *pixel = Color::White;
+            *pixel = Color::Black;
         }
     }
 }
