@@ -1,7 +1,7 @@
+use rand::Rng;
+
 use crate::bus::Bus;
 use crate::display::{Color, DisplaySink, SCREEN_HEIGHT, SCREEN_WIDTH};
-
-const SPRITE_SIZE: u16 = 5;
 
 #[derive(Default)]
 pub struct Cpu {
@@ -11,6 +11,7 @@ pub struct Cpu {
     sound_timer: u8,
     delay_timer: u8,
     stack: Vec<usize>,
+    tick: f32,
     pub keypad: [bool; 16],
 }
 
@@ -23,10 +24,10 @@ impl Cpu {
             sound_timer: 0,
             delay_timer: 0,
             stack: Vec::with_capacity(12),
+            tick: 0.0,
             keypad: [false; 16],
         }
     }
-
     pub fn fetch_execute(&mut self, bus: &mut Bus, display_sink: &mut DisplaySink) {
         let instruction = self.fetch_instruction(bus);
         self.execute_instruction(instruction, bus, display_sink);
@@ -48,6 +49,7 @@ impl Cpu {
         if self.delay_timer > 0 {
             self.delay_timer -= 1;
         }
+
         if self.sound_timer > 0 && self.sound_timer == 1 {
             self.sound_timer -= 1;
         }
@@ -68,8 +70,6 @@ impl Cpu {
                 0x00EE => {
                     if let Some(return_address) = self.stack.pop() {
                         self.pc = return_address;
-                    } else {
-                        unimplemented!()
                     }
                 }
                 _ => unreachable!(),
@@ -96,7 +96,6 @@ impl Cpu {
             0x5000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let y = usize::from((instruction & 0x00F0) >> 4);
-
                 if self.v[x] == self.v[y] {
                     self.pc += 2;
                 }
@@ -112,7 +111,6 @@ impl Cpu {
             0x8000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let y = usize::from((instruction & 0x00F0) >> 4);
-
                 match instruction & 0x000F {
                     0x0000 => {
                         self.v[x] = self.v[y];
@@ -138,7 +136,7 @@ impl Cpu {
                     }
                     0x0006 => {
                         self.v[F] = (self.v[y] & 0x01 != 0) as u8;
-                        self.v[x] = self.v[y] >> 1;
+                        self.v[x] >>= 1;
                     }
                     0x0007 => {
                         let (result, borrow) = self.v[y].overflowing_sub(self.v[x]);
@@ -146,8 +144,8 @@ impl Cpu {
                         self.v[F] = !borrow as u8;
                     }
                     0x000E => {
-                        self.v[F] = (self.v[y] & 0x80 != 0) as u8;
-                        self.v[x] = self.v[y] << 1;
+                        self.v[F] = (self.v[x] >> 7) & 1;
+                        self.v[x] <<= 1;
                     }
                     _ => unreachable!(),
                 }
@@ -155,7 +153,6 @@ impl Cpu {
             0x9000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let y = usize::from((instruction & 0x00F0) >> 4);
-
                 match instruction & 0x000F {
                     0x0000 => {
                         if self.v[x] != self.v[y] {
@@ -173,12 +170,11 @@ impl Cpu {
             }
             0xC000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
-                self.v[x] = rand::random::<u8>() & ((instruction & 0x00FF) as u8);
+                self.v[x] = rand::thread_rng().gen_range(0..255) & ((instruction & 0x00FF) as u8);
             }
             0xD000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 let vx = usize::from(self.v[x]) % SCREEN_WIDTH;
-
                 let y = usize::from((instruction & 0x00F0) >> 4);
                 let vy = usize::from(self.v[y]) % SCREEN_HEIGHT;
 
@@ -210,7 +206,6 @@ impl Cpu {
             }
             0xE000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
-
                 match instruction & 0x00FF {
                     0x009E => match self.keypad[usize::from(self.v[x])] {
                         true => self.pc += 2,
@@ -225,7 +220,6 @@ impl Cpu {
             }
             0xF000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
-
                 match instruction & 0x00FF {
                     0x0007 => {
                         self.v[x] = self.delay_timer;
@@ -233,8 +227,6 @@ impl Cpu {
                     0x000A => {
                         if let Some(key) = self.keypad.iter().position(|&pressed| pressed) {
                             self.v[x] = key as u8;
-                        } else {
-                            self.pc -= 2;
                         }
                     }
                     0x0015 => {
@@ -245,9 +237,10 @@ impl Cpu {
                     }
                     0x001E => {
                         self.i += u16::from(self.v[x]);
+                        self.v[F] = (self.i > 0xFFF) as u8;
                     }
                     0x0029 => {
-                        self.i = u16::from(self.v[x] & 0x0F) * SPRITE_SIZE;
+                        self.i = u16::from(self.v[x] * 5);
                     }
                     0x0033 => {
                         bus.ram_write_byte(self.i, self.v[x] / 100);
@@ -258,13 +251,11 @@ impl Cpu {
                         for offset in 0..=x {
                             bus.ram_write_byte(self.i + offset as u16, self.v[offset]);
                         }
-                        self.i += x as u16 + 1;
                     }
                     0x0065 => {
                         for offset in 0..=x {
                             self.v[offset] = bus.ram_read_byte(self.i + offset as u16);
                         }
-                        self.i += x as u16 + 1;
                     }
                     _ => unreachable!(),
                 }
