@@ -11,12 +11,6 @@ use crate::rom::Rom;
 
 // Constants
 pub const PROGRAM_START: u16 = 0x200;
-pub const CLOCK_SPEED: u64 = 500;
-pub const REFRESH_RATE: u64 = 60;
-
-// pub const CYCLES_PER_SECOND: u64 = 500;
-// pub const CYCLES_PER_SLEEP: u64 = 10;
-// pub const MILLIS_PER_SLEEP: f64 = (CYCLES_PER_SLEEP as f64 / CYCLES_PER_SECOND as f64) * 1000.0;
 
 pub struct Emulator {
     bus: Bus,
@@ -44,8 +38,11 @@ impl Emulator {
         let mut graphics = Graphics::new(&self.sdl, 800, 600);
         let mut timer = self.sdl.timer().unwrap();
         let mut events = self.sdl.event_pump().unwrap();
+        let mut cycle = 0;
 
         'main: loop {
+            cycle += 1;
+
             let start_time = Instant::now();
             let frame_time = Duration::from_millis(500 / 60);
 
@@ -95,10 +92,9 @@ impl Emulator {
                 }
             }
 
-            let elapsed_time = start_time.elapsed();
-            if elapsed_time < frame_time {
-                let remaining_time = frame_time - elapsed_time;
-                std::thread::sleep(remaining_time);
+            if cycle >= 8 {
+                cycle = 0;
+                std::thread::sleep(frame_time - start_time.elapsed());
             }
         }
     }
