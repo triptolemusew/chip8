@@ -12,7 +12,7 @@ impl Rom {
 
         let mut contents = vec![0; metadata.len() as usize];
 
-        f.read(&mut contents).expect("overflow");
+        f.read_exact(&mut contents).expect("overflow");
 
         Rom { contents }
     }
