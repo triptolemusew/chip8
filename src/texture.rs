@@ -3,19 +3,18 @@ use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 use sdl2::Sdl;
 
-pub struct Graphics {
+pub struct SdlTexture {
     canvas: Canvas<Window>,
     texture: Texture,
 }
 
-impl Graphics {
+impl SdlTexture {
     pub fn new(sdl_context: &Sdl, width: u32, height: u32) -> Self {
         let video_subsystem = sdl_context.video().unwrap();
 
         let window = video_subsystem
             .window("wasm-chip8", width, height)
             .position_centered()
-            .opengl()
             .build()
             .map_err(|e| e.to_string())
             .unwrap();
@@ -36,7 +35,7 @@ impl Graphics {
             .create_texture_target(sdl2::pixels::PixelFormatEnum::RGB332, 64, 32)
             .unwrap();
 
-        Graphics { canvas, texture }
+        SdlTexture { canvas, texture }
     }
 
     pub fn draw(&mut self, buffer: &[u8]) {

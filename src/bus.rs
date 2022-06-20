@@ -1,32 +1,35 @@
 use crate::display::Display;
-use crate::memory::Memory;
+
+const FONTS: [u8; 80] = [
+    0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70, 0xF0, 0x10, 0xF0, 0x80, 0xF0, 0xF0,
+    0x10, 0xF0, 0x10, 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0, 0x80, 0xF0, 0x10, 0xF0, 0xF0, 0x80,
+    0xF0, 0x90, 0xF0, 0xF0, 0x10, 0x20, 0x40, 0x40, 0xF0, 0x90, 0xF0, 0x90, 0xF0, 0xF0, 0x90, 0xF0,
+    0x10, 0xF0, 0xF0, 0x90, 0xF0, 0x90, 0x90, 0xE0, 0x90, 0xe0, 0x90, 0xE0, 0xF0, 0x80, 0x80, 0x80,
+    0x80, 0xF0, 0x90, 0x90, 0x90, 0xE0, 0xF0, 0x80, 0xF0, 0x80, 0xF0, 0xF0, 0x80, 0xF0, 0x80, 0x80,
+];
 
 pub struct Bus {
-    memory: Memory,
-    display: Display,
+    pub memory: Vec<u8>,
+    pub display: Display,
 }
 
 impl Bus {
     pub fn new() -> Self {
+        let mut memory = vec![0; 4096];
+
+        memory[..80].clone_from_slice(&FONTS);
+
         Bus {
-            memory: Memory::new(),
+            memory,
             display: Display::default(),
         }
     }
 
-    pub fn ram_read_byte(&self, address: u16) -> u8 {
-        self.memory.read_byte(address)
+    pub fn read_memory(&self, address: u16) -> u8 {
+        self.memory[address as usize]
     }
 
-    pub fn ram_write_byte(&mut self, address: u16, value: u8) {
-        self.memory.write_byte(address, value)
-    }
-
-    pub fn get_display_buffer(&mut self) -> &mut Display {
-        &mut self.display
-    }
-
-    pub fn clear_screen(&mut self) {
-        self.display.clear();
+    pub fn write_memory(&mut self, address: u16, value: u8) {
+        self.memory[address as usize] = value;
     }
 }

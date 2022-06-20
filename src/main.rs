@@ -1,12 +1,11 @@
 extern crate sdl2;
 
-mod rom;
 mod bus;
-mod graphics;
-mod display;
-mod memory;
 mod cpu;
+mod display;
 mod emulator;
+mod rom;
+mod texture;
 
 use emulator::Emulator;
 use rom::Rom;
@@ -17,7 +16,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let file_name = match args.len() {
-        _ => args.get(1).unwrap()
+        _ => args.get(1).unwrap(),
     };
 
     let rom = Rom::new(&String::from(file_name));

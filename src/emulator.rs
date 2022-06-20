@@ -1,21 +1,17 @@
 use std::time::{Duration, Instant};
 
 use sdl2::event::Event;
-use sdl2::keyboard::{KeyboardState, Keycode, PressedScancodeIterator, Scancode};
+use sdl2::keyboard::{KeyboardState, Keycode, Scancode};
 
 use crate::bus::Bus;
 use crate::cpu::Cpu;
 use crate::display::DisplaySink;
-use crate::graphics::Graphics;
 use crate::rom::Rom;
-
-// Constants
-pub const PROGRAM_START: u16 = 0x200;
+use crate::texture::SdlTexture;
 
 pub struct Emulator {
     bus: Bus,
     cpu: Cpu,
-    sdl: sdl2::Sdl,
 }
 
 impl Emulator {
@@ -23,73 +19,51 @@ impl Emulator {
         Emulator {
             bus: Bus::new(),
             cpu: Cpu::new(),
-            sdl: sdl2::init().unwrap(),
         }
     }
 
     pub fn load_rom(&mut self, rom: &Rom) {
-        for i in 0..rom.get_rom_size() {
-            self.bus
-                .ram_write_byte(PROGRAM_START + (i as u16), rom.contents[i]);
+        for (i, item) in rom.contents.iter().enumerate() {
+            self.bus.write_memory(0x200 + (i as u16), *item);
         }
     }
 
     pub fn run(&mut self) {
-        let mut graphics = Graphics::new(&self.sdl, 800, 600);
-        let mut timer = self.sdl.timer().unwrap();
-        let mut events = self.sdl.event_pump().unwrap();
+        let sdl = sdl2::init().unwrap();
+        let frame_time = Duration::from_millis(500 / 60);
+
+        let mut texture = SdlTexture::new(&sdl, 800, 600);
+        let mut events = sdl.event_pump().unwrap();
         let mut cycle = 0;
 
         'main: loop {
+            let mut display_sink = DisplaySink::new();
+            let start_time = Instant::now();
             cycle += 1;
 
-            let start_time = Instant::now();
-            let frame_time = Duration::from_millis(500 / 60);
-
-            let mut display_sink = DisplaySink::new();
             self.cpu.fetch_execute(&mut self.bus, &mut display_sink);
 
             // Only render the frame when it's available as a full buffer
             if let Some(buffer) = display_sink.consume() {
-                graphics.draw(buffer.as_ref());
+                texture.draw(buffer.as_ref());
             }
 
-            // TODO: Refactor this out to a gamepad to read keypresses
             for event in events.poll_iter() {
                 match event {
                     Event::Quit { .. }
                     | Event::KeyDown {
                         keycode: Some(Keycode::Escape),
+                        repeat: false,
                         ..
                     } => break 'main,
                     _ => {}
                 }
             }
 
-            for key in events.keyboard_state().pressed_scancodes().into_iter() {
-                let pressed = match key {
-                    Scancode::Num0 => 0x0,
-                    Scancode::Num1 => 0x1,
-                    Scancode::Num2 => 0x2,
-                    Scancode::Num3 => 0x3,
-                    Scancode::Num4 => 0x4,
-                    Scancode::Num5 => 0x5,
-                    Scancode::Num6 => 0x6,
-                    Scancode::Num7 => 0x7,
-                    Scancode::Num8 => 0x8,
-                    Scancode::Num9 => 0x9,
-                    Scancode::A => 0xA,
-                    Scancode::B => 0xB,
-                    Scancode::C => 0xC,
-                    Scancode::D => 0xD,
-                    Scancode::E => 0xE,
-                    Scancode::F => 0xF,
-                    _ => -1,
-                };
-
-                if pressed >= 0 {
-                    self.cpu.keypad[pressed as usize] = true;
-                }
+            // Keypad stuff
+            let key_state = KeyboardState::new(&mut events);
+            for i in 0..=0xF {
+                self.cpu.keypad[i as usize] = key_state.is_scancode_pressed(get_sdl_keycode(i));
             }
 
             if cycle >= 8 {
@@ -97,5 +71,27 @@ impl Emulator {
                 std::thread::sleep(frame_time - start_time.elapsed());
             }
         }
+    }
+}
+
+fn get_sdl_keycode(key: usize) -> Scancode {
+    match key {
+        0x0 => Scancode::Num0,
+        0x1 => Scancode::Num1,
+        0x2 => Scancode::Num2,
+        0x3 => Scancode::Num3,
+        0x4 => Scancode::Num4,
+        0x5 => Scancode::Num5,
+        0x6 => Scancode::Num6,
+        0x7 => Scancode::Num7,
+        0x8 => Scancode::Num8,
+        0x9 => Scancode::Num9,
+        0xA => Scancode::A,
+        0xB => Scancode::B,
+        0xC => Scancode::C,
+        0xD => Scancode::D,
+        0xE => Scancode::E,
+        0xF => Scancode::F,
+        _ => panic!(),
     }
 }

@@ -21,7 +21,6 @@ use std::rc::Rc;
 mod bus;
 mod cpu;
 mod display;
-mod memory;
 mod rom;
 
 use bus::Bus;
@@ -147,7 +146,7 @@ impl WasmEmulator {
 
     pub fn load_rom(&mut self, rom: &[u8]) {
         for (i, item) in rom.iter().enumerate() {
-            self.bus.ram_write_byte(PROGRAM_START + (i as u16), *item);
+            self.bus.write_memory(0x200 + (i as u16), *item);
         }
     }
 
@@ -156,7 +155,7 @@ impl WasmEmulator {
     }
 
     pub fn draw_graphics(&mut self, context: &CanvasRenderingContext2d) {
-        let buffer = self.bus.get_display_buffer();
+        let buffer = self.bus.display;
 
         context.set_fill_style(&JsValue::from_str("black"));
         context.fill_rect(
