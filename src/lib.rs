@@ -19,14 +19,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 mod bus;
-mod constants;
 mod cpu;
 mod display;
 mod memory;
 mod rom;
 
 use bus::Bus;
-use constants::*;
 use cpu::Cpu;
 
 pub const HARD_WIDTH: usize = 800;
