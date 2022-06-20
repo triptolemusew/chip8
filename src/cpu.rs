@@ -13,7 +13,6 @@ pub struct Cpu {
     delay_timer: u8,
     stack: Vec<usize>,
     is_key_pressed: [bool; 16],
-    pub draw_enable: bool,
 }
 
 impl Cpu {
@@ -26,7 +25,6 @@ impl Cpu {
             delay_timer: 0,
             stack: Vec::with_capacity(12),
             is_key_pressed: [false; 16],
-            draw_enable: true,
         }
     }
 
