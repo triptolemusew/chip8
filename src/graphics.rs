@@ -40,18 +40,8 @@ impl Graphics {
     }
 
     pub fn draw(&mut self, buffer: &[u8]) {
-        self.texture
-            .update(None, buffer, 64)
-            .expect("Failed updating texture.");
-
-        self.canvas.set_draw_color(Color::RGB(0, 0, 0));
-
-        self.canvas.clear();
-
-        self.canvas
-            .copy(&self.texture, None, None)
-            .expect("Failed applying texture.");
-
+        self.texture.update(None, buffer, 64).unwrap();
+        self.canvas.copy(&self.texture, None, None).unwrap();
         self.canvas.present();
     }
 }
