@@ -66,9 +66,9 @@ impl Emulator {
                 self.cpu.keypad[i as usize] = key_state.is_scancode_pressed(get_sdl_keycode(i));
             }
 
-            if cycle >= 8 {
-                cycle = 0;
-                std::thread::sleep(frame_time - start_time.elapsed());
+            let end_time: Instant = Instant::now();
+            if end_time - start_time < frame_time {
+                std::thread::sleep(frame_time - (end_time - start_time));
             }
         }
     }
