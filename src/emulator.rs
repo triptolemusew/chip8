@@ -30,18 +30,18 @@ impl Emulator {
 
     pub fn run(&mut self) {
         let sdl = sdl2::init().unwrap();
-        let frame_time = Duration::from_millis(500 / 60);
+        let frame_time = Duration::from_millis(500 / 30);
 
-        let mut texture = SdlTexture::new(&sdl, 800, 600);
+        let mut texture = SdlTexture::new(&sdl, 640, 320);
         let mut events = sdl.event_pump().unwrap();
         let mut cycle = 0;
 
         'main: loop {
             let mut display_sink = DisplaySink::new();
             let start_time = Instant::now();
-            cycle += 1;
-
-            self.cpu.fetch_execute(&mut self.bus, &mut display_sink);
+            for _ in 0..8 {
+                self.cpu.fetch_execute(&mut self.bus, &mut display_sink);
+            }
 
             // Only render the frame when it's available as a full buffer
             if let Some(buffer) = display_sink.consume() {
