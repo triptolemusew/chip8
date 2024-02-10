@@ -17,3 +17,10 @@ cargo build --features="sdl"
 ```
 cargo run --features="sdl" <ROM>
 ```
+
+## Development with WASM
+
+```
+cd web/
+npm run start
+```
