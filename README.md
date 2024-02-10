@@ -6,8 +6,13 @@ Chip8 implementation written in Rust with SDL2 for the rendering.
 
 This project support building for both the wasm binary through `wasm-pack` and natively running the emulator through sdl.
 
+## Building
 
-Running natively:
+```
+cargo build --features="sdl"
+```
+
+## Running
 
 ```
 cargo run --features="sdl" <ROM>
