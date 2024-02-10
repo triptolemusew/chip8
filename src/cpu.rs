@@ -25,15 +25,15 @@ impl Cpu {
             delay_timer: 0,
             stack: Vec::with_capacity(12),
             keypad: [false; 16],
-            draw_enable: true,
+            draw_enable: false,
         }
     }
 
     // pub fn fetch_execute(&mut self, bus: &mut Bus, display_sink: &mut DisplaySink) {
     pub fn fetch_execute(&mut self, bus: &mut Bus, display_sink: Option<&mut DisplaySink>) {
         let instruction = self.fetch_instruction(bus);
-        let sink = display_sink.unwrap();
-        self.execute_instruction(instruction, bus, sink);
+        // let sink = display_sink.unwrap();
+        self.execute_instruction(instruction, bus, display_sink);
     }
 
     fn fetch_instruction(&mut self, bus: &mut Bus) -> u16 {
@@ -62,7 +62,8 @@ impl Cpu {
         &mut self,
         instruction: u16,
         bus: &mut Bus,
-        display_sink: &mut DisplaySink,
+        // display_sink: &mut DisplaySink,
+        display_sink: Option<&mut DisplaySink>,
     ) {
         const F: usize = 0xF;
         match instruction & 0xF000 {
@@ -205,7 +206,11 @@ impl Cpu {
                         }
                     }
                 }
-                display_sink.append(bus.display.clone());
+
+                if let Some(x) = display_sink {
+                    x.append(bus.display.clone());
+                }
+                self.draw_enable = true;
             }
             0xE000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
