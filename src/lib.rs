@@ -100,22 +100,20 @@ pub fn run() -> Result<(), JsValue> {
     let max_timeout = 20;
     let mut current_timeout = 0;
 
-    *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        loop {
-            wasm_emulator.step();
+    *g.borrow_mut() = Some(Closure::wrap(Box::new(move || loop {
+        wasm_emulator.step();
 
-            if wasm_emulator.cpu.draw_enable {
-                wasm_emulator.draw_graphics(&context);
-                request_animation_frame(f.borrow().as_ref().unwrap());
-                current_timeout = 0;
-                wasm_emulator.cpu.draw_enable = false;
-                break;
-            }
+        if wasm_emulator.cpu.draw_enable {
+            wasm_emulator.draw_graphics(&context);
+            request_animation_frame(f.borrow().as_ref().unwrap());
+            current_timeout = 0;
+            wasm_emulator.cpu.draw_enable = false;
+            break;
+        }
 
-            if current_timeout >= max_timeout {
-                current_timeout = 0;
-                break;
-            }
+        if current_timeout >= max_timeout {
+            current_timeout = 0;
+            break;
         }
     }) as Box<dyn FnMut()>));
 
