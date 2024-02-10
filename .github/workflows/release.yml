@@ -31,3 +31,4 @@ jobs:
         with:
           RUSTTARGET: ${{ matrix.target }}
           EXTRA_FILES: "README.md"
+          RUSTFLAGS: '--features="sdl"'
