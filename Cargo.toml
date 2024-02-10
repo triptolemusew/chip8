@@ -1,6 +1,6 @@
 [package]
 name = "chip8"
-version = "0.1.2"
+version = "0.2"
 description = "Chip8 emulator written in Rust"
 edition = "2018"
 
