@@ -12,6 +12,7 @@ pub struct Cpu {
     delay_timer: u8,
     stack: Vec<usize>,
     pub keypad: [bool; 16],
+    pub draw_enable: bool,
 }
 
 impl Cpu {
@@ -24,12 +25,15 @@ impl Cpu {
             delay_timer: 0,
             stack: Vec::with_capacity(12),
             keypad: [false; 16],
+            draw_enable: true,
         }
     }
 
-    pub fn fetch_execute(&mut self, bus: &mut Bus, display_sink: &mut DisplaySink) {
+    // pub fn fetch_execute(&mut self, bus: &mut Bus, display_sink: &mut DisplaySink) {
+    pub fn fetch_execute(&mut self, bus: &mut Bus, display_sink: Option<&mut DisplaySink>) {
         let instruction = self.fetch_instruction(bus);
-        self.execute_instruction(instruction, bus, display_sink);
+        let sink = display_sink.unwrap();
+        self.execute_instruction(instruction, bus, sink);
     }
 
     fn fetch_instruction(&mut self, bus: &mut Bus) -> u16 {

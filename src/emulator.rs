@@ -40,7 +40,7 @@ impl Emulator {
             let mut display_sink = DisplaySink::new();
             let start_time = Instant::now();
             for _ in 0..8 {
-                self.cpu.fetch_execute(&mut self.bus, &mut display_sink);
+                self.cpu.fetch_execute(&mut self.bus, Some(&mut display_sink));
             }
 
             // Only render the frame when it's available as a full buffer

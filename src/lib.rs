@@ -151,7 +151,7 @@ impl WasmEmulator {
     }
 
     pub fn step(&mut self) {
-        self.cpu.fetch_execute(&mut self.bus);
+        self.cpu.fetch_execute(&mut self.bus, None);
     }
 
     pub fn draw_graphics(&mut self, context: &CanvasRenderingContext2d) {
