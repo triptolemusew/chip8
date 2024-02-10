@@ -96,21 +96,14 @@ pub fn run() -> Result<(), JsValue> {
     let mut cycle_counter = 0;
     let mut current_timeout = 0;
 
-    log("FINISH SETTING UP ALL");
-
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         loop {
-            log("IN THE LOOP");
             wasm_emulator.step();
 
             if wasm_emulator.cpu.draw_enable {
-                log("DRAW GRAPHICS - ");
                 wasm_emulator.draw_graphics(&context);
-                log("REQUEST ANIMATION FRAME - ");
                 request_animation_frame(f.borrow().as_ref().unwrap());
-                log("CURRENT TIMEOUT - ");
                 current_timeout = 0;
-                log("SET DRAW ENABLE TO FALSE - ");
                 wasm_emulator.cpu.draw_enable = false;
                 break;
             }
@@ -129,8 +122,6 @@ pub fn run() -> Result<(), JsValue> {
             // wasm_emulator.draw_graphics(&context);
         }
     }) as Box<dyn FnMut()>));
-
-    log("BEFORE REQUEST ANIMATION FRAME");
 
     #[cfg(feature = "wasm")]
     request_animation_frame(g.borrow().as_ref().unwrap());
@@ -154,20 +145,16 @@ impl WasmEmulator {
     }
 
     pub fn load_rom(&mut self, rom: &[u8]) {
-        log("Hello..");
-
         for (i, item) in rom.iter().enumerate() {
             self.bus.write_memory(0x200 + (i as u16), *item);
         }
     }
 
     pub fn step(&mut self) {
-        log("IN STEP");
         self.cpu.fetch_execute(&mut self.bus, None);
     }
 
     pub fn draw_graphics(&mut self, context: &CanvasRenderingContext2d) {
-        log("IN DRAW GRAPHICS");
         let buffer = self.bus.display;
 
         context.set_fill_style(&JsValue::from_str("black"));
