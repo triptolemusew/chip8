@@ -19,12 +19,12 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({template: "index.html"}),
-    // new WasmPackPlugin({
-    //   crateDirectory: path.join(__dirname, '../'),
-    //   outDir: path.join(__dirname, '../pkg'),
-    //   args: "--log-level warn",
-    //   extraArgs: '--features=wasm',
-    // })
+    new WasmPackPlugin({
+      crateDirectory: path.join(__dirname, '../'),
+      outDir: path.join(__dirname, '../pkg'),
+      args: "--log-level warn",
+      extraArgs: '--features=wasm',
+    })
   ],
   experiments: {
     asyncWebAssembly: true
