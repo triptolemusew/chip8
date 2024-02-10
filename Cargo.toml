@@ -16,6 +16,7 @@ sdl = ["sdl2"]
 wasm = ["js-sys", "wasm-bindgen", "web-sys"]
 
 [dependencies]
+cfg-if = {version = "0.1"}
 getrandom = {version = "0.2.2", features = ["js"]}
 rand = {version = "*", features = ["getrandom"]}
 

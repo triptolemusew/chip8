@@ -1,19 +1,3 @@
-#[cfg(feature = "wasm")]
-extern crate js_sys;
-#[cfg(feature = "wasm")]
-extern crate wasm_bindgen;
-#[cfg(feature = "wasm")]
-extern crate web_sys;
-
-#[cfg(feature = "wasm")]
-use js_sys::Math;
-#[cfg(feature = "wasm")]
-use wasm_bindgen::prelude::*;
-#[cfg(feature = "wasm")]
-use wasm_bindgen::JsCast;
-#[cfg(feature = "wasm")]
-use web_sys::CanvasRenderingContext2d;
-
 use core::f64;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -26,43 +10,64 @@ mod rom;
 use bus::Bus;
 use cpu::Cpu;
 
+cfg_if::cfg_if! {
+    if #[cfg(feature = "wasm")] {
+        extern crate js_sys;
+        extern crate wasm_bindgen;
+        extern crate web_sys;
+
+        use wasm_bindgen::prelude::*;
+        use wasm_bindgen::JsCast;
+        use web_sys::CanvasRenderingContext2d;
+
+        #[wasm_bindgen]
+        extern "C" {
+            #[wasm_bindgen(js_namespace = console)]
+            fn log(s: &str);
+
+            #[wasm_bindgen(js_namespace = console)]
+            fn error(s: &str);
+        }
+
+        fn window() -> web_sys::Window {
+            web_sys::window().expect("global `window` should be OK.")
+        }
+
+        fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+            window()
+                .request_animation_frame(f.as_ref().unchecked_ref())
+                .expect("`requestAnimationFrame` should be OK.");
+        }
+
+        fn cancel_animation_frame(id: i32) {
+            window()
+                .cancel_animation_frame(id)
+                .expect("`cancelAnimationFrame` should be OK.");
+        }
+
+
+        pub struct WasmEmulator {
+            pub bus: Bus,
+            pub cpu: Cpu,
+        }
+
+        pub fn sleep(millis: u64) {
+            let start = js_sys::Date::now();
+            let mut current = start;
+            while current - start < millis as f64 {
+                current = js_sys::Date::now();
+            }
+        }
+    }
+}
+
 pub const HARD_WIDTH: usize = 800;
 pub const HARD_HEIGHT: usize = 600;
 
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-
-    #[wasm_bindgen(js_namespace = console)]
-    fn error(s: &str);
-}
-
-#[cfg(feature = "wasm")]
-fn window() -> web_sys::Window {
-    web_sys::window().expect("global `window` should be OK.")
-}
-
-#[cfg(feature = "wasm")]
-fn request_animation_frame(f: &Closure<dyn FnMut()>) {
-    window()
-        .request_animation_frame(f.as_ref().unchecked_ref())
-        .expect("`requestAnimationFrame` should be OK.");
-}
-
-#[cfg(feature = "wasm")]
-fn cancel_animation_frame(id: i32) {
-    window()
-        .cancel_animation_frame(id)
-        .expect("`cancelAnimationFrame` should be OK.");
-}
-
-#[cfg(feature = "wasm")]
-#[wasm_bindgen]
 pub fn run() -> Result<(), JsValue> {
     let document = window().document().expect("window should have a document");
-    // let body = document.body().expect("document should have a body");
 
     let f = Rc::new(RefCell::new(None));
     let g = f.clone();
@@ -93,7 +98,6 @@ pub fn run() -> Result<(), JsValue> {
     let _ = context.scale(10.0, 10.0);
 
     let max_timeout = 20;
-    let mut cycle_counter = 0;
     let mut current_timeout = 0;
 
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
@@ -112,27 +116,12 @@ pub fn run() -> Result<(), JsValue> {
                 current_timeout = 0;
                 break;
             }
-
-            // cycle_counter += 1;
-            // if cycle_counter >= CYCLES_PER_SLEEP {
-            //     cycle_counter = 0;
-            //     sleep(MILLIS_PER_SLEEP.floor() as u64);
-            // }
-            // wasm_emulator.step();
-            // wasm_emulator.draw_graphics(&context);
         }
     }) as Box<dyn FnMut()>));
 
-    #[cfg(feature = "wasm")]
     request_animation_frame(g.borrow().as_ref().unwrap());
 
     Ok(())
-}
-
-#[cfg(feature = "wasm")]
-pub struct WasmEmulator {
-    pub bus: Bus,
-    pub cpu: Cpu,
 }
 
 #[cfg(feature = "wasm")]
@@ -165,7 +154,6 @@ impl WasmEmulator {
             (HARD_HEIGHT as f64) * 2.0,
         );
 
-        // For pixel in screen
         context.set_fill_style(&JsValue::from_str("white"));
 
         // log(format!("{:?}", buffer.as_ref()).as_str());
@@ -179,14 +167,5 @@ impl WasmEmulator {
                 };
             }
         }
-    }
-}
-
-#[cfg(feature = "wasm")]
-pub fn sleep(millis: u64) {
-    let start = js_sys::Date::now();
-    let mut current = start;
-    while current - start < millis as f64 {
-        current = js_sys::Date::now();
     }
 }
