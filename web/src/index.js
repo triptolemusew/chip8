@@ -1,7 +1,3 @@
-// import * as wasm from '../pkg';
-//
-// wasm.run();
-//
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';

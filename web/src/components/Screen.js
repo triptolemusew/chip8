@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useEffect } from 'react';
-import * as wasm from '../../pkg';
+import * as wasm from '../../../pkg';
 
 const ScreenComponent = () => {
   useEffect(() => {
     wasm.run();
   });
 
+  const canvasRef = useRef(null);
+
   return (
     <div>
-      <canvas id="chip8" height="150" width="150" />
+      <canvas id="chip8" ref={canvasRef} />
     </div>
   )
 }

@@ -14,52 +14,26 @@ module.exports = {
   experiments: {
     asyncWebAssembly: true
   },
+  mode: "development",
   plugins: [
-    new CopyWebpackPlugin([
-      {
-        from: paths.src + "/assets",
-        to: "assets",
-        globOptions: {
-          dot: true,
-          ignore: ["*.DS_Store"],
-        },
-      }
-    ]),
     new HtmlWebpackPlugin({
-      title: "National Missing and Unidentified Persons",
       template: paths.public + "/index.html",
       filename: "index.html",
     }),
     new WasmPackPlugin({
-      crateDirectory: path.join(__dirname, '../'),
-      outDir: path.join(__dirname, '../pkg'),
+      crateDirectory: path.join(__dirname, '../../'),
+      outDir: path.join(__dirname, '../../pkg'),
       args: "--log-level warn",
       extraArgs: '--features=wasm',
     })
   ],
-  resolve: {
-    extensions: [".js", ".jsx", ".json"],
-  },
   module: {
     rules: [
       { test: /\.(js|jsx)$/, exclude: /node_modules/, use: ["babel-loader"] },
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader", "postcss-loader"],
-        // test: /\.(scss|css)$/,
-        // use: [
-        //   "style-loader",
-        //   {
-        //     loader: "css-loader",
-        //     options: { sourceMap: true, importLoaders: 1 },
-        //   },
-        //   { loader: "sass-loader", options: { sourceMap: true } },
-        // ],
       },
-      // Images: Copy image files to build folder
-      { test: /\.(?:ico|gif|png|jpg|jpeg)$/i, type: "asset/resource" },
-      // Fonts and SVGs: Inline files
-      { test: /\.(woff(2)?|eot|ttf|otf|svg|)$/, type: "asset/inline" },
     ]
   }
 }
