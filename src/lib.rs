@@ -61,8 +61,8 @@ cfg_if::cfg_if! {
     }
 }
 
-pub const HARD_WIDTH: usize = 800;
-pub const HARD_HEIGHT: usize = 600;
+pub const CANVAS_WIDTH: usize = 64;
+pub const CANVAS_HEIGHT: usize = 32;
 
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
@@ -92,8 +92,8 @@ pub fn run() -> Result<(), JsValue> {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
-    canvas.set_width(HARD_WIDTH as u32);
-    canvas.set_height(HARD_HEIGHT as u32);
+    canvas.set_width((CANVAS_WIDTH * 10) as u32);
+    canvas.set_height((CANVAS_HEIGHT * 10) as u32);
 
     let _ = context.scale(10.0, 10.0);
 
@@ -148,13 +148,11 @@ impl WasmEmulator {
         context.fill_rect(
             0.0,
             0.0,
-            (HARD_WIDTH as f64) * 2.0,
-            (HARD_HEIGHT as f64) * 2.0,
+            (CANVAS_WIDTH as f64) * 2.0,
+            (CANVAS_HEIGHT as f64) * 2.0,
         );
-
         context.set_fill_style(&JsValue::from_str("white"));
 
-        // log(format!("{:?}", buffer.as_ref()).as_str());
         for y in 0..32 {
             for x in 0..64 {
                 let pixel = buffer[y][x];
