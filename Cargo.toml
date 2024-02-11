@@ -8,19 +8,22 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [[bin]]
-name = "sdl"
+name = "native"
+required-features = ["sdl"]
 path = "src/main.rs"
 
 [features]
 sdl = ["sdl2"]
-wasm = ["js-sys", "wasm-bindgen", "web-sys"]
+wasm = ["console_error_panic_hook", "js-sys", "wasm-bindgen", "web-sys"]
 
 [dependencies]
 cfg-if = {version = "0.1"}
 getrandom = {version = "0.2.2", features = ["js"]}
+lazy_static = {version = "1.4"}
 rand = {version = "*", features = ["getrandom"]}
 
-sdl2 = {version = "0.34.3", optional = true, features = ["unsafe_textures"]}
+console_error_panic_hook = {version = "0.1", optional = true}
+sdl2 = {version = "0.34.3", optional = true, default-features = false, features = ["unsafe_textures"]}
 js-sys = {version = "0.3.57", optional = true}
 wasm-bindgen = {version = "0.2.80", optional = true}
 web-sys = {version = "0.3.55", optional = true, features = [
