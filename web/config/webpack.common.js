@@ -37,19 +37,24 @@ module.exports = {
       extraArgs: '--features=wasm',
     })
   ],
+  resolve: {
+    extensions: [".js", ".jsx", ".json"],
+  },
   module: {
     rules: [
       { test: /\.(js|jsx)$/, exclude: /node_modules/, use: ["babel-loader"] },
       {
-        test: /\.(scss|css)$/,
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: { sourceMap: true, importLoaders: 1 },
-          },
-          { loader: "sass-loader", options: { sourceMap: true } },
-        ],
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader", "postcss-loader"],
+        // test: /\.(scss|css)$/,
+        // use: [
+        //   "style-loader",
+        //   {
+        //     loader: "css-loader",
+        //     options: { sourceMap: true, importLoaders: 1 },
+        //   },
+        //   { loader: "sass-loader", options: { sourceMap: true } },
+        // ],
       },
       // Images: Copy image files to build folder
       { test: /\.(?:ico|gif|png|jpg|jpeg)$/i, type: "asset/resource" },
