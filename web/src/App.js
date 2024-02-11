@@ -27,7 +27,7 @@ const App = () => {
     loadRom(game);
   })
 
-  const loadRom = game => {
+  const loadRom = (game) => {
     fetch(`roms/${game}`)
       .then(i => i.arrayBuffer())
       .then(buffer => {

@@ -34,7 +34,6 @@ impl Emulator {
 
         let mut texture = SdlTexture::new(&sdl, 640, 320);
         let mut events = sdl.event_pump().unwrap();
-        let mut cycle = 0;
 
         'main: loop {
             let mut display_sink = DisplaySink::new();

@@ -1,6 +1,7 @@
 use core::f64;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Duration;
 
 mod bus;
 mod cpu;
@@ -50,7 +51,7 @@ cfg_if::cfg_if! {
             pub cpu: Cpu,
         }
 
-        pub fn sleep(millis: u64) {
+        pub fn sleep(millis: f64) {
             let start = js_sys::Date::now();
             let mut current = start;
             while current - start < millis as f64 {
@@ -92,24 +93,22 @@ pub fn run(rom: &[u8]) -> Result<(), JsValue> {
     canvas.set_height((CANVAS_HEIGHT * 10) as u32);
 
     let _ = context.scale(10.0, 10.0);
-
-    let max_timeout = 20;
-    let mut current_timeout = 0;
+    let frame_time = Duration::from_millis(500 / 30).as_secs_f64();
 
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || loop {
+        let start_time = js_sys::Date::now();
         wasm_emulator.step();
 
         if wasm_emulator.cpu.draw_enable {
             wasm_emulator.draw_graphics(&context);
             request_animation_frame(f.borrow().as_ref().unwrap());
-            current_timeout = 0;
             wasm_emulator.cpu.draw_enable = false;
             break;
         }
 
-        if current_timeout >= max_timeout {
-            current_timeout = 0;
-            break;
+        let end_time = js_sys::Date::now();
+        if end_time - start_time < frame_time {
+            sleep(frame_time - (end_time - start_time));
         }
     }) as Box<dyn FnMut()>));
 
