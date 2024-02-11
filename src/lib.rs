@@ -45,7 +45,6 @@ cfg_if::cfg_if! {
                 .expect("`cancelAnimationFrame` should be OK.");
         }
 
-
         pub struct WasmEmulator {
             pub bus: Bus,
             pub cpu: Cpu,
@@ -66,17 +65,14 @@ pub const CANVAS_HEIGHT: usize = 32;
 
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
-pub fn run() -> Result<(), JsValue> {
+pub fn run(rom: &[u8]) -> Result<(), JsValue> {
     let document = window().document().expect("window should have a document");
 
     let f = Rc::new(RefCell::new(None));
     let g = f.clone();
 
-    let rom = include_bytes!("../roms/SPACE_INVADERS").to_vec();
     let mut wasm_emulator = WasmEmulator::new();
-
-    // Load the rom
-    wasm_emulator.load_rom(&rom);
+    wasm_emulator.load_rom(rom);
 
     // Creating context
     let canvas = document
@@ -145,12 +141,9 @@ impl WasmEmulator {
         let buffer = self.bus.display;
 
         context.set_fill_style(&JsValue::from_str("black"));
-        context.fill_rect(
-            0.0,
-            0.0,
-            (CANVAS_WIDTH as f64) * 2.0,
-            (CANVAS_HEIGHT as f64) * 2.0,
-        );
+
+        context.fill_rect(0.0, 0.0, CANVAS_WIDTH as f64, CANVAS_HEIGHT as f64);
+
         context.set_fill_style(&JsValue::from_str("white"));
 
         for y in 0..32 {

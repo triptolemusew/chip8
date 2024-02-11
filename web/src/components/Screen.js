@@ -1,12 +1,6 @@
 import React, { useRef } from 'react';
-import { useEffect } from 'react';
-import * as wasm from '../../../pkg';
 
 const ScreenComponent = () => {
-  useEffect(() => {
-    wasm.run();
-  });
-
   const canvasRef = useRef(null);
 
   return (

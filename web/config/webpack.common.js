@@ -15,6 +15,11 @@ module.exports = {
     asyncWebAssembly: true
   },
   mode: "development",
+  resolve: {
+    fallback: {
+      "fs": false,
+    }
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: paths.public + "/index.html",
