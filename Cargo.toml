@@ -10,7 +10,6 @@ crate-type = ["cdylib", "rlib"]
 [[bin]]
 name = "native"
 required-features = ["sdl"]
-path = "src/main.rs"
 
 [features]
 sdl = ["sdl2"]
