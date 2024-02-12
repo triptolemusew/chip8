@@ -15,6 +15,6 @@ fn main() {
     let context = SdlContext::new(64 * 10, 32 * 10);
     let mut emulator = Emulator::new(context);
 
-    emulator.load_rom(&rom);
+    emulator.load_rom(&rom.contents);
     emulator.run();
 }

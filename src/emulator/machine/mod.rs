@@ -5,8 +5,6 @@ mod display;
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 
-use crate::rom::Rom;
-
 use self::bus::Bus;
 use self::cpu::Cpu;
 use self::display::DisplaySink;
@@ -93,8 +91,8 @@ impl Emulator {
         }
     }
 
-    pub fn load_rom(&mut self, rom: &Rom) {
-        for (i, item) in rom.contents.iter().enumerate() {
+    pub fn load_rom(&mut self, rom: &[u8]) {
+        for (i, item) in rom.iter().enumerate() {
             self.bus.write_memory(0x200 + (i as u16), *item);
         }
     }
