@@ -1,7 +1,7 @@
+use super::display::Color;
 use rand::Rng;
 
 use super::bus::Bus;
-use super::display::{Color, DisplaySink};
 use super::{Keys, NUM_KEYS, SCREEN_HEIGHT, SCREEN_WIDTH};
 
 #[derive(Default)]
@@ -30,13 +30,23 @@ impl Cpu {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.pc = 0x200;
+        self.v = [0; 16];
+        self.i = 0;
+        self.sound_timer = 0;
+        self.delay_timer = 0;
+        self.stack = Vec::with_capacity(12);
+        self.draw_enable = true;
+    }
+
     pub fn set_keys(&mut self, keys: [bool; NUM_KEYS]) {
         *self.keypad.state.write().unwrap() = keys;
     }
 
-    pub fn step(&mut self, bus: &mut Bus, display_sink: &mut DisplaySink) {
+    pub fn step(&mut self, bus: &mut Bus) {
         let instr = self.fetch_instruction(bus);
-        self.execute_instruction(instr, bus, display_sink);
+        self.execute_instruction(instr, bus);
     }
 
     fn fetch_instruction(&mut self, bus: &mut Bus) -> u16 {
@@ -51,6 +61,7 @@ impl Cpu {
         if self.sound_timer > 0 && self.sound_timer == 1 {
             self.sound_timer -= 1;
         }
+
         instruction
     }
 
@@ -58,12 +69,7 @@ impl Cpu {
         self.keypad.is_pressed(key)
     }
 
-    fn execute_instruction(
-        &mut self,
-        instruction: u16,
-        bus: &mut Bus,
-        display_sink: &mut DisplaySink,
-    ) {
+    fn execute_instruction(&mut self, instruction: u16, bus: &mut Bus) {
         const F: usize = 0xF;
         match instruction & 0xF000 {
             0x0000 => match instruction & 0x0FFF {
@@ -205,18 +211,15 @@ impl Cpu {
                         }
                     }
                 }
-                display_sink.append(bus.display.clone());
                 self.draw_enable = true;
             }
             0xE000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
                 match instruction & 0x00FF {
-                    // 0x009E => match self.keypad[usize::from(self.v[x])] {
                     0x009E => match self.key_pressed(self.v[x]) {
                         true => self.pc += 2,
                         false => {}
                     },
-                    // 0x00A1 => match !self.keypad[usize::from(self.v[x])] {
                     0x00A1 => match !self.key_pressed(self.v[x]) {
                         true => self.pc += 2,
                         false => {}
@@ -245,9 +248,6 @@ impl Cpu {
                         if let Some(key) = key_press {
                             self.v[x] = key;
                         }
-                        // if let Some(key) = self.keypad.iter().position(|&pressed| pressed) {
-                        //     self.v[x] = key as u8;
-                        // }
                     }
                     0x0015 => {
                         self.delay_timer = self.v[x];

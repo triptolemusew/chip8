@@ -1,6 +1,6 @@
 mod bus;
 mod cpu;
-mod display;
+pub mod display;
 
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
@@ -9,7 +9,9 @@ use self::bus::Bus;
 use self::cpu::Cpu;
 use self::display::DisplaySink;
 
-use super::context::Context;
+use super::games::ROMS;
+
+use super::platform::Platform;
 
 pub const NUM_KEYS: usize = 16;
 pub const SCREEN_HEIGHT: usize = 32;
@@ -77,17 +79,58 @@ pub fn keyboard_to_keypad(keyboard: char) -> Result<u8, ()> {
 }
 
 pub struct Emulator {
-    context: Box<dyn Context>,
-    bus: bus::Bus,
-    cpu: cpu::Cpu,
+    context: Box<dyn Platform>,
+    pub bus: bus::Bus,
+    pub cpu: cpu::Cpu,
+    pub current_game: Option<String>,
 }
 
 impl Emulator {
-    pub fn new(context: Box<dyn Context>) -> Self {
-        Emulator {
+    pub fn new(context: Box<dyn Platform>) -> Self {
+        let mut ret = Self {
             context,
             bus: Bus::new(),
             cpu: Cpu::new(),
+            current_game: Some("TANK".to_string()),
+        };
+        ret.context.init();
+        ret
+    }
+
+    fn reset(&mut self) {
+        self.cpu.reset();
+        self.bus.reset();
+    }
+
+    pub fn draw_graphics(&mut self, buffer: display::Display) {
+        self.context.draw_graphics(buffer);
+    }
+
+    pub fn step(&mut self) {
+        self.cpu.step(&mut self.bus);
+    }
+
+    pub fn update_keys(&mut self) {
+        self.set_keys(self.context.get_key_state());
+    }
+
+    pub fn set_keys(&mut self, keys: [bool; NUM_KEYS]) {
+        self.cpu.set_keys(keys);
+    }
+
+    pub fn load_game(&mut self, name: &str) -> Result<usize, ()> {
+        self.reset();
+
+        if let Some(rom) = ROMS.get(name) {
+            self.current_game = Some(name.to_string());
+
+            for (idx, &byte) in rom.iter().enumerate() {
+                self.bus.write_memory(0x200 + (idx as u16), byte);
+            }
+            let num_bytes = rom.len();
+            Ok(num_bytes)
+        } else {
+            Err(())
         }
     }
 
@@ -105,11 +148,15 @@ impl Emulator {
             let start_time = Instant::now();
 
             for _ in 0..10 {
-                self.cpu.step(&mut self.bus, &mut display_sink);
+                // self.cpu.step(&mut self.bus, &mut display_sink);
+                self.cpu.step(&mut self.bus);
             }
 
-            if let Some(buffer) = display_sink.consume() {
-                self.context.draw_graphics(buffer.as_ref());
+            if self.cpu.draw_enable {
+                display_sink.append(self.bus.display.clone());
+                if let Some(buffer) = display_sink.consume() {
+                    self.context.draw_graphics(buffer);
+                }
             }
 
             if self.context.listen_for_input() {

@@ -23,6 +23,12 @@ impl Bus {
             display: display::Display::default(),
         }
     }
+    
+    pub fn reset(&mut self) {
+        self.memory = vec![0; 4096];
+        self.memory[..80].clone_from_slice(&FONTS);
+        self.display.clear();
+    }
 
     pub fn read_memory(&self, address: u16) -> u8 {
         self.memory[address as usize]
