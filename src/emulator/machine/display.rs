@@ -1,7 +1,5 @@
+use crate::{APP_HEIGHT, APP_WIDTH};
 use std::ops::{Index, IndexMut};
-
-const SCREEN_HEIGHT: usize = 32;
-const SCREEN_WIDTH: usize = 64;
 
 #[derive(Clone, Copy)]
 #[repr(u8)]
@@ -12,13 +10,13 @@ pub enum Color {
 
 #[derive(Clone, Copy)]
 pub struct Display {
-    pixels: [Color; SCREEN_HEIGHT * SCREEN_WIDTH],
+    pixels: [Color; (APP_HEIGHT * APP_WIDTH) as usize],
 }
 
 impl Display {
     #[allow(unused)]
     pub fn get_index_from_coords(x: usize, y: usize) -> usize {
-        y * SCREEN_WIDTH + x
+        y * APP_WIDTH as usize + x
     }
 
     pub fn clear(&mut self) {
@@ -31,7 +29,7 @@ impl Display {
 impl Default for Display {
     fn default() -> Self {
         Self {
-            pixels: [Color::Black; SCREEN_WIDTH * SCREEN_HEIGHT],
+            pixels: [Color::Black; (APP_WIDTH * APP_HEIGHT) as usize],
         }
     }
 }
@@ -45,15 +43,15 @@ impl AsRef<[u8]> for Display {
 impl Index<usize> for Display {
     type Output = [Color];
     fn index(&self, index: usize) -> &Self::Output {
-        let start = index * SCREEN_WIDTH;
-        &self.pixels[start..(start + SCREEN_WIDTH)]
+        let start = index * APP_WIDTH as usize;
+        &self.pixels[start..(start + APP_WIDTH as usize)]
     }
 }
 
 impl IndexMut<usize> for Display {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        let start = index * SCREEN_WIDTH;
-        &mut self.pixels[start..(start + SCREEN_WIDTH)]
+        let start = index * APP_WIDTH as usize;
+        &mut self.pixels[start..(start + APP_WIDTH as usize)]
     }
 }
 
