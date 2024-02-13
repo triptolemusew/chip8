@@ -10,6 +10,7 @@ use std::{
 
 use self::dom::*;
 use super::display::DisplaySink;
+use super::keypad::Keys;
 use super::*;
 use crate::{APP_HEIGHT, APP_SCALE_FACTOR, APP_WIDTH};
 

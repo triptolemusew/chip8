@@ -1,6 +1,7 @@
 use crate::ROMS;
 
 use super::*;
+use super::keypad::keyboard_to_keypad;
 use console_error_panic_hook::set_once;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};

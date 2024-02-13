@@ -2,7 +2,8 @@ use super::display::Color;
 use rand::Rng;
 
 use super::bus::Bus;
-use super::{Keys, NUM_KEYS, SCREEN_HEIGHT, SCREEN_WIDTH};
+use super::keypad::{Keys, NUM_KEYS};
+use crate::{APP_HEIGHT, APP_WIDTH};
 
 #[derive(Default)]
 pub struct Cpu {
@@ -183,20 +184,20 @@ impl Cpu {
             }
             0xD000 => {
                 let x = usize::from((instruction & 0x0F00) >> 8);
-                let vx = usize::from(self.v[x]) % SCREEN_WIDTH;
+                let vx = usize::from(self.v[x]) % APP_WIDTH as usize;
                 let y = usize::from((instruction & 0x00F0) >> 4);
-                let vy = usize::from(self.v[y]) % SCREEN_HEIGHT;
+                let vy = usize::from(self.v[y]) % APP_HEIGHT as usize;
 
                 self.v[F] = 0;
 
                 for row in 0..(instruction & 0x000F) {
                     let pixel_y = vy + usize::from(row);
-                    if pixel_y >= SCREEN_HEIGHT {
+                    if pixel_y >= APP_HEIGHT as usize {
                         break;
                     }
                     for col in 0..8u16 {
                         let pixel_x = vx + usize::from(col);
-                        if pixel_x >= SCREEN_WIDTH {
+                        if pixel_x >= APP_WIDTH as usize {
                             break;
                         }
                         if bus.read_memory(self.i + row) & (1 << (7 - col)) != 0 {

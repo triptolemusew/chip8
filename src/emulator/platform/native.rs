@@ -7,6 +7,8 @@ use sdl2::EventPump;
 use std::time::Duration;
 
 use super::*;
+use super::keypad::{Keys, keyboard_to_keypad};
+
 use crate::APP_NAME;
 
 pub struct NativePlatform {
