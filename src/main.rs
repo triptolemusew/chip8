@@ -10,11 +10,11 @@ fn main() {
         _ => args.get(1).unwrap(),
     };
 
-    let rom = Cartridge::new(&String::from(file_name));
+    let cart = Cartridge::new(&String::from(file_name));
 
     let context = SdlContext::new(64 * 10, 32 * 10);
     let mut emulator = Emulator::new(context);
 
-    emulator.load_rom(&rom.contents);
+    emulator.load_rom(&cart.contents);
     emulator.run();
 }
