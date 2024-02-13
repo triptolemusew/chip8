@@ -1,5 +1,5 @@
-use chip8::rom::Rom;
 use chip8::{emulator::Emulator, SdlContext};
+use chip8::cartridge::Cartridge;
 
 use std::env;
 
@@ -10,7 +10,7 @@ fn main() {
         _ => args.get(1).unwrap(),
     };
 
-    let rom = Rom::new(&String::from(file_name));
+    let rom = Cartridge::new(&String::from(file_name));
 
     let context = SdlContext::new(64 * 10, 32 * 10);
     let mut emulator = Emulator::new(context);
