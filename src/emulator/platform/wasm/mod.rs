@@ -98,6 +98,7 @@ impl Platform for WasmPlatform {
 pub fn run() -> Result<()> {
     let context = WasmPlatform::new();
     let mut emulator = Emulator::new(context);
+
     let default_game = &*CURRENT_GAME.read().unwrap();
     emulator.load_game(default_game).unwrap();
 

@@ -1,11 +1,13 @@
 use crate::ROMS;
 
-use super::*;
 use super::keypad::keyboard_to_keypad;
+use super::*;
 use console_error_panic_hook::set_once;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{CanvasRenderingContext2d, Document, Window};
+
+const GAME_SELECT_ID: &str = "game-select";
 
 pub fn sleep(duration: u64) {
     let start = js_sys::Date::now();
@@ -62,7 +64,7 @@ fn attach_game_listener(document: &Document) -> Result<()> {
     }) as Box<dyn Fn(_)>);
 
     document
-        .get_element_by_id("game-select")
+        .get_element_by_id(GAME_SELECT_ID)
         .unwrap()
         .dyn_into::<web_sys::HtmlSelectElement>()?
         .set_onchange(Some(callback.as_ref().unchecked_ref()));
@@ -106,7 +108,7 @@ fn attach_keyup_listener(document: &Document) -> Result<()> {
 fn update_all() -> Result<()> {
     let document = get_document();
     let new_game_select = document
-        .get_element_by_id("game-select")
+        .get_element_by_id(GAME_SELECT_ID)
         .unwrap()
         .dyn_into::<web_sys::HtmlSelectElement>()?;
 
@@ -116,7 +118,7 @@ fn update_all() -> Result<()> {
 
 fn list_all_roms(document: &Document) -> Result<()> {
     let select = document
-        .get_element_by_id("game-select")
+        .get_element_by_id(GAME_SELECT_ID)
         .unwrap()
         .dyn_into::<web_sys::HtmlSelectElement>()?;
 
