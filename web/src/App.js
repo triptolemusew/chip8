@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import MainScreen from './components/Screen';
-import * as wasm from '../../pkg';
+import * as wasm from 'chip8';
 
 import './app.css';
 
@@ -21,24 +21,9 @@ library.add(faStar, faArrowUp, faArrowRight, faArrowDown, faArrowLeft, faTrophy,
 config.autoAddCss = false
 
 const App = () => {
-  const [game, setGame] = useState("TANK");
-
   useEffect(() => {
-    loadRom(game);
+    wasm.run();
   })
-
-  const loadRom = (game) => {
-    fetch(`roms/${game}`)
-      .then(i => i.arrayBuffer())
-      .then(buffer => {
-        wasm.run(new Uint8Array(buffer));
-      })
-  }
-
-  const onSelectGameChange = (e) => {
-    setGame(e.target.value);
-    loadRom(e.target.value);
-  }
 
   return (
     <div class="bg-main">
@@ -50,7 +35,7 @@ const App = () => {
               <div class="flex items-center justify-between ">
                 <div class="flex items-center">
                   <div class="relative h-10 w-72 min-w-[200px]">
-                    <select onChange={onSelectGameChange} defaultValue={game} class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+                    <select id="game-select" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
                       <option value="TANK">TANK</option>
                       <option value="SPACE_INVADERS">SPACE INVADERS</option>
                       <option value="TETRIS">TETRIS</option>
